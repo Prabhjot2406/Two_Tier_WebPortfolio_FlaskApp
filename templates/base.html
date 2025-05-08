@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Prabhjot Singh | DevOps & AWS Cloud Engineer</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="navbar-container">
+      <a href="/about" class="navbar-logo">Prabhjot Singh</a>
+      <div class="navbar-menu">
+        <a href="/about">About</a>
+        <a href="/experience">Experience</a>
+        <a href="/skills">Skills</a>
+        <a href="/projects">Projects</a>
+        <a href="/contact">Contact</a>
+        <a href="/feedback">Feedback</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Page Content -->
+  <main class="container">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <p>© {{ 2025 }} Prabhjot Singh. All rights reserved.</p>
+    </div>
+  </footer>
+
+</body>
+</html>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">

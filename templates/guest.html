@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block content %}
+   <!-- Guest Book Section -->
+   <section id="guestbook" class="section">
+    <div class="space-y-2 mb-8">
+      <h2 class="text-3xl font-bold tracking-tight">Guest Book</h2>
+      <p class="text-muted">Leave a message or comment. I'd love to hear from you!</p>
+    </div>
+
+    <div class="guestbook-container">
+      <div class="guestbook-form">
+        <div id="error-message" class="error-message"></div>
+
+        <form method="POST" action="/guest">
+          <div class="form-group">
+            <label for="guest-name">Your Name:</label>
+            <input type="text" id="guest-name" name="name" class="input" placeholder="Enter your name" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="guest-email">Your Email: (optional)</label>
+            <input type="email" id="guest-email" name="email" class="input" placeholder="Enter your email">
+          </div>
+          
+          <div class="form-group">
+            <label for="guest-comment">Your Message:</label>
+            <textarea id="guest-comment" name="comment" class="textarea" placeholder="Leave a comment or message..." rows="5" required></textarea>
+          </div>
+          
+          <button type="submit" class="btn btn-primary w-full">
+            <i class="fas fa-paper-plane mr-2"></i>
+            Submit Message
+          </button>
+        </form>
+        
+        <div id="thank-you" class="thank-you">
+          <h2>Thank You!</h2>
+          <p>Your message has been received. I appreciate you taking the time to leave a comment!</p>
+          <button id="new-comment-btn" class="btn btn-primary mt-3">Leave Another Comment</button>
+        </div>
+      </div>
+
+      <div class="guestbook-entries">
+        <h3 class="text-xl font-bold mb-4">Recent Messages</h3>
+        
+        <!-- Sample entries - these would typically be generated from a database -->
+        <div class="guestbook-entry">
+          <div class="entry-header">
+            <div class="entry-name">John Doe</div>
+            <div class="entry-date">May 1, 2023</div>
+          </div>
+          <div class="entry-content">
+            Great portfolio! Your AWS projects are impressive. Would love to connect and discuss cloud architecture sometime.
+          </div>
+        </div>
+        
+        <div class="guestbook-entry">
+          <div class="entry-header">
+            <div class="entry-name">Sarah Johnson</div>
+            <div class="entry-date">April 15, 2023</div>
+          </div>
+          <div class="entry-content">
+            I'm impressed by your DevOps experience. The CI/CD pipeline work you've done is exactly what our team is looking to implement. Would you be open to a quick chat?
+          </div>
+        </div>
+        
+        <div class="guestbook-entry">
+          <div class="entry-header">
+            <div class="entry-name">Michael Chen</div>
+            <div class="entry-date">April 3, 2023</div>
+          </div>
+          <div class="entry-content">
+            Your portfolio is very well organized and professional. The projects section really showcases your technical abilities. Nice work!
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+  <h1>Welcome Guest!</h1>
+  <p>Thank you for visiting. Please leave your name and a comment below.</p>
+
+  {% if success %}
+    <div class="thank-you">
+      <h2>Thank You!</h2>
+      <p>Your message has been received. I appreciate you taking the time to leave a comment!</p>
+    </div>
+  {% endif %}
+
+  {% if error %}
+    <div class="error">{{ error }}</div>
+  {% endif %}
+
+  <form method="POST" action="/feedback">
+    <div class="form-group">
+      <label for="name">Your Name:</label>
+      <input type="text" name="name" placeholder="Enter your name" required>
+    </div>
+
+    <div class="form-group">
+      <label for="comment">Your Comment:</label>
+      <textarea name="comment" placeholder="Leave a comment or message..." required></textarea>
+    </div>
+
+    <button type="submit">Submit</button>
+  </form>
+</div>
+<link rel="stylesheet" href="{{ url_for('static', filename='feedback-styles.css') }}">
+{% endblock %}
