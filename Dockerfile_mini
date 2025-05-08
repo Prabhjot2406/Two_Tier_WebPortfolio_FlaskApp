@@ -1,0 +1,31 @@
+# Stage 1 - Builder
+FROM python:3.9-slim as builder
+
+WORKDIR /app
+
+COPY . .
+
+# Install pip and virtualenv
+RUN pip install --upgrade pip virtualenv
+
+# Create virtual environment and install dependencies
+RUN virtualenv /venv && \
+    /venv/bin/pip install -r requirements.txt
+
+# Stage 2 - Distroless
+FROM gcr.io/distroless/python3-debian12
+
+WORKDIR /app
+
+# Copy virtualenv from builder
+COPY --from=builder /venv /venv
+COPY --from=builder /app /app
+
+ENV PATH="/venv/bin:$PATH"
+ENV PYTHONPATH="/venv/lib/python3.9/site-packages"
+
+EXPOSE 5000
+
+ENTRYPOINT ["python3"]
+CMD ["app.py"]
+
