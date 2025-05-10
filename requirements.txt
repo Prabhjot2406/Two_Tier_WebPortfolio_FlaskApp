@@ -1,3 +1,6 @@
-Flask
-Flask_SQLAlchemy
-psycopg2-binary
+Flask==2.3.3
+gunicorn==21.2.0
+psycopg2-binary==2.9.9
+Flask_SQLAlchemy==3.1.1
+python-dotenv==1.0.1  # optional, if you use .env files in dev
+
