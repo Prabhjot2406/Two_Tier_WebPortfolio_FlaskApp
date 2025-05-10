@@ -1,23 +1,32 @@
-# ------------------- Stage 1: Build Stage ------------------------------
-FROM python:3.9 AS builder
+# Stage 1: Builder
+FROM python:3.9-slim as builder
 
 WORKDIR /app
 
-# Copy and install Python dependencies
+#Install build dependencies (for psycopg3)
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends gcc libpq-dev && \
+    rm -rf /var/lib/apt/lists/*
+
+# Set a fixed path for custom installation
+ENV PYTHONUSERBASE=/python-deps
+
+#Install dependencies to a custom directory
+COPY requirements.txt .
+RUN pip install --no-cache-dir --prefix=/python-deps -r requirements.txt
+
+#Copy application code
 COPY . .
-RUN pip install -r requirements.txt --target=/app/deps
 
-# ------------------- Stage 2: Final Stage ------------------------------
-FROM gcr.io/distroless/python3-debian12
+# Stage 2: Distroless Final Image
+FROM gcr.io/distroless/python3
 
 WORKDIR /app
+#Set environment variable so Python can find custom packages
+ENV PYTHONPATH="/python-deps/lib/python3.9/site-packages"
 
-# Copy dependencies and application code from the builder stage
-COPY --from=builder /app/deps /app/deps
+#Copy only what’s needed from the builder stage
+COPY --from=builder /python-deps /python-deps
 COPY --from=builder /app .
-
-ENV PYTHONPATH=/app/deps
-
-EXPOSE 5000
-
-CMD ["app.py"]
+# Gunicorn command (distroless needs the full path to Python module)
+CMD ["-m", "gunicorn", "--bind=0.0.0.0:5000", "app:app"]
