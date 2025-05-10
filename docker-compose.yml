@@ -23,8 +23,8 @@ services:
       start_period: 10s
 
   web:
-    image: flaskapp
-    container_name: flask-app
+    image: flaskapp_mini2
+    container_name: flaskapp_mini2
     environment:
       DB_USER: postgres
       DB_PASSWORD: admin
