@@ -1,0 +1,44 @@
+
+
+pipeline {
+    agent any
+
+    stages {
+        stage('code') {
+            steps {
+                echo 'This is code stage'
+                git url: "https://github.com/Prabhjot2406/Two_Tier_WebPortfolio_FlaskApp.git", branch: "main"
+            }
+        }
+
+
+        stage('upload') {
+            steps {
+                echo 'This is test stage'
+                withCredentials([usernamePassword(
+        credentialsId: "FlaskToken",
+        usernameVariable: "DOCKER_USERNAME",
+        passwordVariable: "DOCKER_PASSWORD"
+)])
+sh "docker login -u ${env.DOCKER_USERNAME} -p ${env.DOCKER_PASSWORD}"
+sh "docker image tag flaskapp_mini2 ${env.DOCKER_USERNAME}/flaskapp_mini2"
+sh "docker push ${env.DOCKER_USERNAME}/flaskapp_mini2:latest"
+
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                sh 'docker compose down --remove-orphans'
+                sh 'docker compose up -d --build'   
+            }
+        }
+        stage('Cleanup') {
+    steps {
+        echo 'Cleaning up dangling images...'
+        sh 'docker image prune -f'
+    }
+}
+
+    }
+}
