@@ -267,15 +267,6 @@ pipeline {
                 }
             }
         }
-        
-        stage('Image delete') {
-            steps {
-                echo 'deleting the existing image'
-                sh 'docker rmi -f $IMAGE_NAME'
-                sh 'docker ps'
-            }
-        }
-
         stage('Pull Image') {
             steps {
                 echo 'Pulling the Docker image from ECR...'
@@ -283,21 +274,28 @@ pipeline {
                 sh 'docker ps'
             }
         }
-        stage('service down') {
+            stage('service down') {
+        steps {
+            echo 'Turn down running service'
+            sh 'docker compose down --remove-orphans'
+        }
+    }
+
+        stage('service up') {
             steps {
-                echo 'Turn down running service'
-                sh 'docker-compose down --remove-orphans'
-'
+                echo 'Bringing service up'
+                sh 'docker compose up -d --build'
             }
         }
-         stage('service up') {
+        stage('Cleanup Docker') {
             steps {
-                echo 'service up'
-                sh 'docker compose up -d --build'   
+                sh 'docker image prune -f'
             }
         }
     }
 }
+
+
 
 
 
