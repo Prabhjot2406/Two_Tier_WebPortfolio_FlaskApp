@@ -53,6 +53,7 @@ pipeline {
         }
         stage('Cleanup Docker') {
             steps {
+                
                 sh 'docker image prune -f'
             }
         }
