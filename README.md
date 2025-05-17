@@ -275,4 +275,20 @@ networks:
   my_network:
 
 
+The --remove-orphans flag in the docker compose down command is used to remove containers that were part of a previous Docker Compose setup but are no longer defined in the current docker-compose.yml file.
+
+Explanation:
+Orphan containers: These are containers that were created by a previous docker-compose run but are not included in the current docker-compose.yml file. For example, if you removed or renamed a service in the docker-compose.yml file, the container associated with that service would become an "orphan."
+
+--remove-orphans: This option ensures that all orphaned containers are stopped and removed when running docker compose down. It essentially helps clean up leftover containers that are not part of the current Docker Compose project.
+
+Example:
+If your docker-compose.yml initially had services for web and db, and you later removed the db service from the file, running docker compose down --remove-orphans would:
+
+Stop and remove the web container (since it’s part of the current compose setup).
+
+Stop and remove the db container, which is no longer part of the updated docker-compose.yml file (thus considered an orphan).
+
+Without --remove-orphans, the db container would persist even though it’s no longer defined in the configuration.
+
 ```
