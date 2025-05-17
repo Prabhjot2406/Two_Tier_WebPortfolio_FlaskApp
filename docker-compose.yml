@@ -22,7 +22,7 @@ services:
       start_period: 10s
 
   web:
-    image: flaskapp_mini2
+    image: 021891604768.dkr.ecr.us-east-1.amazonaws.com/flaskapp:latest
     container_name: flaskapp_mini2
     environment:
       DB_USER: postgres
