@@ -1,6 +1,6 @@
 ## Date: 2025-05-08
 ### Step 1: Create EC2 set up all the networking variables
-- Chose [Tech Stack/Tool] (e.g., Docker + Flask)
+- Chose [Tech Stack/Tool] (e.g., Docker + Flask + jenkins)
 - Created GitHub repo
 - Initialized project structure
 
@@ -19,71 +19,6 @@
 - docker run -d --name flask-app --network my_network -e DB_USER=postgres -e DB_PASSWORD=admin -e DB_NAME=dbuser -e DB_HOST=my-postgres -p 5000:5000 flaskapp
 
 ### now the docker image size for the flask app is more than a gb. I will use multistaging with distroless for automation and to improve security.
-
--
--
-```bash
-# ------------------- Stage 1: Build Stage ------------------------------
-FROM python:3.9 AS builder
-
-WORKDIR /app
-
-# Copy and install Python dependencies
-COPY . .
-RUN pip install -r requirements.txt --target=/app/deps
-
-# ------------------- Stage 2: Final Stage ------------------------------
-FROM gcr.io/distroless/python3-debian12
-
-WORKDIR /app
-
-# Copy dependencies and application code from the builder stage
-COPY --from=builder /app/deps /app/deps
-COPY /app .
-
-EXPOSE 5000
-
-CMD ["python", "app.py"]
-```
-
-docker build -f ./Docker_multistage_Distroless -t flask_app_mini .
-
-
-docker run -d --name flask-app --network my_network -e DB_USER=postgres -e DB_PASSWORD=admin -e DB_NAME=dbuser -e DB_HOST=my-postgres -p 5001:5000 flaskapp:latest
-
-```bash
-# Stage 1 - Builder
-FROM python:3.9-slim as builder
-
-WORKDIR /app
-
-COPY . .
-
-# Create a virtual environment
-RUN python -m venv /opt/venv
-
-# Upgrade pip and install dependencies into the venv
-RUN /opt/venv/bin/pip install --upgrade pip && \
-    /opt/venv/bin/pip install -r requirements.txt
-
-# Stage 2 - Distroless runtime
-FROM gcr.io/distroless/python3-debian12
-
-WORKDIR /app
-
-COPY --from=builder /opt/venv /opt/venv
-COPY --from=builder /app /app
-
-# Activate venv
-ENV PATH="/opt/venv/bin:$PATH"
-
-EXPOSE 5000
-
-ENTRYPOINT ["python3"]
-CMD ["app.py"]
-```
-
-# or 
 
 ```bash 
 # Stage 1 - Builder
@@ -118,7 +53,7 @@ ENTRYPOINT ["python3"]
 CMD ["app.py"]
 ```
 
-#error
+###error
 ```bash
 docker logs a0083
 Traceback (most recent call last):
@@ -164,16 +99,11 @@ With above docker file I am using docker multistaging and distroless image to re
 Now, To automate it so that I don't have to add environment variables to the run docker commands twice to up the pSQL and flask app container.
 
 ---
-# big time fail to implement multistage and distroless 
+### big time fail to implement multistage and distroless 
 
-# AGAIN
+### slim image dockerfile working fine.
 
-  docker run -d --name my-postgres --network my_network -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=admin -e POSTGRES_DB=dbuser -v pgdata:/var/lib/postgresql/data -p 5432:5432 postgres
-5be79138a78cf9017a4e82c6ffde448a700b40bfde3483eab409fbfad713cf22
-
-docker run -d --name flask-app --network my_network -e DB_USER=postgres -e DB_PASSWORD=admin -e DB_NAME=dbuser -e DB_HOST=my-postgres -p 5000:5000 flaskapp
-b1d18140ca5b127aab4fe4b131e59105a9cd594fa39bc85c617368a668b5869a
----
+Dockerfile_mini2
 
 # DOCKER COMPOSE WITHOUT HEALTHCHECK
 
@@ -292,3 +222,83 @@ Stop and remove the db container, which is no longer part of the updated docker-
 Without --remove-orphans, the db container would persist even though it’s no longer defined in the configuration.
 
 ```
+
+### PRE REQUISITES 
+
+- AWS CLI INSTALLED
+- AWS LOGIN
+- CREATE ECR
+- JENKINS CREDINTIALS SETUP FOR AWS
+- aws-credentials install plugin in jenkins
+
+  
+### JENKINS PIPELINE 
+
+pipeline {
+    agent any
+    
+    environment {
+        AWS_REGION = 'us-east-1'
+        ECR_REPO = '021891604768.dkr.ecr.us-east-1.amazonaws.com/flaskapp'
+        IMAGE_TAG = 'latest'
+        IMAGE_NAME = "${ECR_REPO}:${IMAGE_TAG}"
+    }
+
+    stages {
+        stage('Git Clone') {
+            steps {
+                echo 'Cloning the repository...'
+                git url: "https://github.com/Prabhjot2406/Two_Tier_WebPortfolio_FlaskApp.git", branch: "main"
+            }
+        }
+
+        stage('Login to AWS ECR') {
+            steps {
+                withCredentials([[
+                    $class: 'AmazonWebServicesCredentialsBinding',
+                    credentialsId: 'aws-creds-id',
+                    accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                    secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+                ]]) {
+                    sh '''
+                        aws ecr get-login-password --region $AWS_REGION | \
+                        docker login --username AWS --password-stdin $ECR_REPO
+                    '''
+                }
+            }
+        }
+        
+        stage('Image delete') {
+            steps {
+                echo 'deleting the existing image'
+                sh 'docker rmi -f $IMAGE_NAME'
+                sh 'docker ps'
+            }
+        }
+
+        stage('Pull Image') {
+            steps {
+                echo 'Pulling the Docker image from ECR...'
+                sh 'docker pull $IMAGE_NAME'
+                sh 'docker ps'
+            }
+        }
+        stage('service down') {
+            steps {
+                echo 'Turn down running service'
+                sh 'docker-compose down --remove-orphans'
+'
+            }
+        }
+         stage('service up') {
+            steps {
+                echo 'service up'
+                sh 'docker compose up -d --build'   
+            }
+        }
+    }
+}
+
+
+
+
