@@ -1,4 +1,11 @@
 ## Date: 2025-05-08
+
+### Step 0: Install setup.sh
+
+chmod +x setup.sh
+./setup.sh
+
+
 ### Step 1: Create EC2 set up all the networking variables
 - Chose [Tech Stack/Tool] (e.g., Docker + Flask + jenkins)
 - Created GitHub repo
