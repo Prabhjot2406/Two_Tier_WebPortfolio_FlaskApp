@@ -3,6 +3,7 @@
 ### Step 0: Install setup.sh
 
 chmod +x setup.sh
+
 ./setup.sh
 
 
